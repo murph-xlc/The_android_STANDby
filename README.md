@@ -1,44 +1,27 @@
-# Stillstand
+# Stillstand 2.0
 
-A premium, minimal Android standby clock inspired by the calm, full-screen feel of phone bedside displays. This is an independent implementation; it does not include Apple's proprietary code, assets, or fonts.
+A minimal Android standby clock with six clock faces, swipe navigation, a custom launcher icon, and automatic landscape/stillness detection.
 
-## What it does
+## What's new
+- Swipe left/right on the standby clock to cycle through six faces.
+- Tap the clock to dismiss it.
+- Blue digital clock is the default face and accent.
+- Minimal charcoal/silver launcher icon.
+- Tiny "made by Krishn" credit in the app's About area.
+- Existing user-enabled foreground service and five-second stillness detection retained.
 
-- Six full-screen clock faces, including a square analog dial with smoothly sweeping hands.
-- Warm ivory, sage, and arctic-blue accent palettes, plus a red low-light face.
-- User-controlled background standby detection.
-- A foreground service listens to accelerometer and gyroscope signals after the user enables it.
-- When the device is held in landscape and remains still for five seconds, a full-screen application overlay fades in.
-- Tap the overlay to dismiss it. Movement rearms the detector.
-- An ongoing notification exposes a Stop action.
+## Important Android limitation
+The standby display is a `TYPE_APPLICATION_OVERLAY` so the service can show it after background sensor detection. Android system bars are controlled by the system and are not reliably hidden by application overlays. The app requests immersive/fullscreen presentation as a best effort, but some Android versions and manufacturers may continue to show the status bar. A regular fullscreen Activity can hide system bars, but Android restricts launching Activities from the background, so replacing the overlay with an Activity would make automatic activation unreliable. This build prioritizes automatic activation.
 
-## Important Android behaviour
+The overlay appears while the display is on. It does not replace the lock screen or wake a screen that is off. Battery-management behaviour varies by manufacturer.
 
-1. Install and open Stillstand.
-2. Tap **Turn on standby**.
-3. Android opens **Display over other apps**. Allow Stillstand.
-4. Return to Stillstand and tap **Turn on standby** again.
-5. You can now return to the home screen. Keep the display on, hold the phone in landscape, and keep it still for five seconds.
-
-The overlay permission is required because Android restricts background activity launches. The app therefore uses a user-enabled foreground service and `TYPE_APPLICATION_OVERLAY`, rather than trying to force-launch an Activity from the background. The service displays a persistent notification while active.
-
-**Limitations:** Android does not guarantee background service survival on every manufacturer build. Some devices aggressively restrict background processes; if detection stops, set Stillstand's battery usage to Unrestricted / Don't optimize in Android settings. The clock appears while the screen is on; it does not replace the lock screen and is not guaranteed to wake a screen that is off. Sensor behaviour also varies by device and case/stand angle. This project has not been device-tested on every Android model.
-
-## Build an APK
-
-The repository includes a GitHub Actions workflow. Push the project to GitHub, open **Actions**, run **Android APK**, then download the `Stillstand-debug-apk` artifact from the completed workflow.
-
-For a local build with JDK 17 and Android SDK installed:
+## Build
+Requires JDK 17, Android SDK 35, and Gradle 8.9.
 
 ```bash
-gradle assembleDebug
+gradle --no-daemon assembleDebug
 ```
 
-APK output: `app/build/outputs/apk/debug/app-debug.apk`.
+APK: `app/build/outputs/apk/debug/app-debug.apk`
 
-## Technical notes
-
-- Kotlin + Android SDK, no third-party runtime dependencies.
-- `SYSTEM_ALERT_WINDOW` is granted explicitly by the user in Android Settings.
-- Foreground service uses the `specialUse` type with a descriptive subtype because continuous sensor monitoring does not fit the standard media/location/call service types. Play distribution requires policy review and an accurate foreground-service declaration.
-- No analytics, ads, network calls, or account sign-in.
+GitHub Actions builds the debug APK on push and uploads it as `Stillstand-debug-apk`.
